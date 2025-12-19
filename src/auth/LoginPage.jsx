@@ -7,8 +7,8 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 
 export default function LoginPage() {
   const nav = useNavigate();
-  const [email, setEmail] = useState("");
-  const [pw, setPw] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
@@ -19,46 +19,37 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
-      // 🔧 너 백엔드 스펙에 맞게 endpoint만 바꿔 끼우면 됨
-      const res = await fetch(`${API_BASE}/login`, {
+      const res = await fetch(`${API_BASE}/users/login`, {
         method: "POST",
+        credentials: "include", // ✅ 쿠키(session_id) 받으려면 필수
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password: pw }),
+        body: JSON.stringify({ username, password }),
       });
 
       if (!res.ok) {
         const t = await res.text().catch(() => "");
-        throw new Error(t || `로그인 실패 (${res.status})`);
+        throw new Error(t || "아이디 또는 비밀번호가 올바르지 않습니다.");
       }
 
-      const data = await res.json().catch(() => ({}));
-
-      // 예: access_token 저장 (스펙 다르면 바꿔)
-      if (data.access_token) localStorage.setItem("access_token", data.access_token);
-
-      // 로그인 성공 후 이동
       nav("/interview");
     } catch (e2) {
-      setErr(e2.message || "로그인 실패");
+      setErr(e2?.message || "로그인 실패");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <AuthLayout
-      title="로그인"
-      subtitle="JobFlow AI로 면접 연습과 프로젝트 분석을 시작하세요."
-    >
+    <AuthLayout title="로그인" subtitle="CS 면접 연습을 시작해볼까요?">
       <form className="auth-form" onSubmit={onSubmit}>
-        <label className="auth-label">이메일</label>
+        <label className="auth-label">아이디</label>
         <input
           className="auth-input"
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
+          type="text"
+          placeholder="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          autoComplete="username"
           required
         />
 
@@ -67,8 +58,8 @@ export default function LoginPage() {
           className="auth-input"
           type="password"
           placeholder="••••••••"
-          value={pw}
-          onChange={(e) => setPw(e.target.value)}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"
           required
         />
@@ -76,12 +67,11 @@ export default function LoginPage() {
         {err && <div className="auth-error">{err}</div>}
 
         <button className="auth-btn" type="submit" disabled={loading}>
-          {loading ? "로그인 중..." : "로그인"}
-          <i className="fa-solid fa-arrow-right" />
+          {loading ? "로그인 중..." : "로그인"} <i className="fa-solid fa-arrow-right" />
         </button>
 
         <div className="auth-foot">
-          <span>아직 계정이 없나요?</span>
+          <span>계정이 없나요?</span>
           <Link className="auth-link" to="/signup">
             회원가입
           </Link>

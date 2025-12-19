@@ -4,6 +4,8 @@ import "./auth.css";
 export default function AuthLayout({ title, subtitle, children }) {
   return (
     <div className="auth-shell">
+      <div className="auth-bg" aria-hidden="true" />
+
       <div className="auth-card">
         <div className="auth-brand">
           <div className="auth-logo">
@@ -11,7 +13,7 @@ export default function AuthLayout({ title, subtitle, children }) {
           </div>
           <div>
             <div className="auth-brand-name">JobFlow</div>
-            <div className="auth-brand-sub">취업 준비를 더 빠르고 선명하게</div>
+            <div className="auth-brand-sub">취업 준비 플랫폼</div>
           </div>
         </div>
 
@@ -22,8 +24,6 @@ export default function AuthLayout({ title, subtitle, children }) {
 
         {children}
       </div>
-
-      <div className="auth-bg" aria-hidden="true" />
     </div>
   );
 }

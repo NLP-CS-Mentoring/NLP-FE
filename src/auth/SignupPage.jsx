@@ -7,10 +7,9 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 
 export default function SignupPage() {
   const nav = useNavigate();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [pw, setPw] = useState("");
-  const [pw2, setPw2] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
@@ -18,7 +17,7 @@ export default function SignupPage() {
     e.preventDefault();
     setErr("");
 
-    if (pw !== pw2) {
+    if (password !== password2) {
       setErr("비밀번호가 일치하지 않습니다.");
       return;
     }
@@ -26,11 +25,10 @@ export default function SignupPage() {
     try {
       setLoading(true);
 
-      // 🔧 너 백엔드 스펙에 맞게 endpoint만 바꿔 끼우면 됨
-      const res = await fetch(`${API_BASE}/signup`, {
+      const res = await fetch(`${API_BASE}/users/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password: pw }),
+        body: JSON.stringify({ username, password }),
       });
 
       if (!res.ok) {
@@ -38,37 +36,25 @@ export default function SignupPage() {
         throw new Error(t || `회원가입 실패 (${res.status})`);
       }
 
-      // 회원가입 성공 → 로그인으로
       nav("/login");
     } catch (e2) {
-      setErr(e2.message || "회원가입 실패");
+      setErr(e2?.message || "회원가입 실패");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <AuthLayout title="회원가입" subtitle="3분 만에 시작하고 바로 연습해보세요.">
+    <AuthLayout title="회원가입" subtitle="계정을 만들고 바로 연습을 시작하세요.">
       <form className="auth-form" onSubmit={onSubmit}>
-        <label className="auth-label">이름</label>
+        <label className="auth-label">아이디</label>
         <input
           className="auth-input"
           type="text"
-          placeholder="정윤"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          autoComplete="name"
-          required
-        />
-
-        <label className="auth-label">이메일</label>
-        <input
-          className="auth-input"
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
+          placeholder="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          autoComplete="username"
           required
         />
 
@@ -76,9 +62,9 @@ export default function SignupPage() {
         <input
           className="auth-input"
           type="password"
-          placeholder="8자 이상 권장"
-          value={pw}
-          onChange={(e) => setPw(e.target.value)}
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           autoComplete="new-password"
           required
         />
@@ -87,9 +73,9 @@ export default function SignupPage() {
         <input
           className="auth-input"
           type="password"
-          placeholder="비밀번호 다시 입력"
-          value={pw2}
-          onChange={(e) => setPw2(e.target.value)}
+          placeholder="••••••••"
+          value={password2}
+          onChange={(e) => setPassword2(e.target.value)}
           autoComplete="new-password"
           required
         />

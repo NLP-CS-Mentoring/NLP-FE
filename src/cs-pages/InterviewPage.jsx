@@ -1,21 +1,22 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 
 async function fetchRandomQuestion() {
-  const res = await fetch(`${API_BASE}/random-question`);
+  const res = await fetch(`${API_BASE}/random-question`, {
+    credentials: "include", // ✅ 로그인 쿠키(session_id) 포함
+  });
   if (!res.ok) {
-    throw new Error(`random-question 실패: ${res.status}`);
+    const text = await res.text().catch(() => "");
+    throw new Error(`random-question 실패: ${res.status} ${text}`);
   }
   return res.json();
 }
 
-async function checkAnswer({ session, id, user_answer }) {
-  const url = new URL(`${API_BASE}/check-answer`);
-  url.searchParams.set("session", session);
-
-  const res = await fetch(url.toString(), {
+async function checkAnswer({ id, user_answer }) {
+  const res = await fetch(`${API_BASE}/check-answer`, {
     method: "POST",
+    credentials: "include", // ✅ 로그인 쿠키(session_id) 포함
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id, user_answer }),
   });
@@ -27,24 +28,7 @@ async function checkAnswer({ session, id, user_answer }) {
   return res.json();
 }
 
-// 간단 세션 생성(백엔드 요구: session 파라미터)
-// 브라우저에 저장해서 새로고침해도 유지
-function getOrCreateSession() {
-  const key = "jobflow_interview_session";
-  const saved = localStorage.getItem(key);
-  if (saved) return saved;
-
-  const s =
-    (typeof crypto !== "undefined" && crypto.randomUUID?.()) ||
-    `sess_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-
-  localStorage.setItem(key, s);
-  return s;
-}
-
 export default function InterviewPage() {
-  const session = useMemo(() => getOrCreateSession(), []);
-
   const [q, setQ] = useState(null); // {id, question, topic, file}
   const [messages, setMessages] = useState([]); // {type:'ai'|'user'|'eval', ...}
   const [input, setInput] = useState("");
@@ -60,7 +44,7 @@ export default function InterviewPage() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
 
   useEffect(() => {
-    if (!hasStarted) return; // 시작 전엔 스크롤 의미 없음
+    if (!hasStarted) return;
     scrollBottom();
   }, [messages.length, loadingQ, checking, hasStarted]);
 
@@ -80,7 +64,7 @@ export default function InterviewPage() {
         ]);
       }
     } catch (e) {
-      setError(e.message || "질문 로드 실패");
+      setError(e?.message || "질문 로드 실패");
     } finally {
       setLoadingQ(false);
     }
@@ -96,19 +80,16 @@ export default function InterviewPage() {
     setInput("");
     setError("");
 
-    // 유저 답변 먼저 UI에 반영
     setMessages((prev) => [...prev, { type: "user", text: answer }]);
 
     try {
       setChecking(true);
 
       const result = await checkAnswer({
-        session,
         id: q.id,
         user_answer: answer,
       });
 
-      // 평가 메시지 추가
       setMessages((prev) => [
         ...prev,
         {
@@ -122,13 +103,12 @@ export default function InterviewPage() {
         },
       ]);
     } catch (e) {
-      setError(e.message || "채점 실패");
+      setError(e?.message || "채점 실패");
     } finally {
       setChecking(false);
     }
   }
 
-  // ✅ 버튼 하나로 시작/다음문제 처리
   async function handleStartOrNext() {
     setError("");
     setInput("");
@@ -175,16 +155,6 @@ export default function InterviewPage() {
           <span className="trend-tag" style={{ margin: 0 }}>
             {hasStarted ? topicLabel : "CS 면접"}
           </span>
-          <span
-            className="trend-tag"
-            style={{
-              marginLeft: 8,
-              background: "#f1f5f9",
-              color: "#334155",
-            }}
-          >
-            session: {session.slice(0, 10)}…
-          </span>
         </div>
 
         <button
@@ -201,7 +171,6 @@ export default function InterviewPage() {
         </button>
       </div>
 
-      {/* ✅ 시작 전 안내 화면 */}
       {!hasStarted && (
         <div
           style={{
@@ -248,7 +217,6 @@ export default function InterviewPage() {
         </div>
       )}
 
-      {/* ✅ 시작 후 채팅 UI */}
       {hasStarted && (
         <>
           <div className="chat-body">
@@ -256,10 +224,7 @@ export default function InterviewPage() {
               if (m.type === "ai") {
                 return (
                   <div key={`ai-${idx}`} className="msg msg-ai">
-                    <i
-                      className="fa-solid fa-robot"
-                      style={{ marginRight: 6 }}
-                    />
+                    <i className="fa-solid fa-robot" style={{ marginRight: 6 }} />
                     {m.text}
                   </div>
                 );
@@ -271,83 +236,46 @@ export default function InterviewPage() {
                   </div>
                 );
               }
-              // eval
               return (
                 <div key={`ev-${idx}`} className="msg msg-ai">
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      marginBottom: 10,
-                    }}
-                  >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                     <span style={{ fontWeight: 800 }}>채점 결과</span>
-                    <span
-                      style={{
-                        padding: "4px 10px",
-                        borderRadius: 999,
-                        fontSize: 12,
-                        ...gradeBadgeStyle(m.grade),
-                      }}
-                    >
-                      {gradeLabel(m.grade)}{" "}
-                      {m.final_correct ? "(최종 정답)" : ""}
+                    <span style={{ padding: "4px 10px", borderRadius: 999, fontSize: 12, ...gradeBadgeStyle(m.grade) }}>
+                      {gradeLabel(m.grade)} {m.final_correct ? "(최종 정답)" : ""}
                     </span>
                   </div>
 
                   <div style={{ fontSize: 13, color: "#475569", marginBottom: 10 }}>
                     <div>
-                      Sequence similarity:{" "}
-                      <b>{Number(m.sequence_similarity ?? 0).toFixed(3)}</b>
+                      Sequence similarity: <b>{Number(m.sequence_similarity ?? 0).toFixed(3)}</b>
                     </div>
                     <div>
-                      Semantic similarity:{" "}
-                      <b>{Number(m.semantic_similarity ?? 0).toFixed(3)}</b>
+                      Semantic similarity: <b>{Number(m.semantic_similarity ?? 0).toFixed(3)}</b>
                     </div>
                   </div>
 
                   {m.correct_answer_core && (
                     <div style={{ marginBottom: 10 }}>
-                      <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                        핵심 정답
-                      </div>
-                      <div style={{ whiteSpace: "pre-wrap" }}>
-                        {m.correct_answer_core}
-                      </div>
+                      <div style={{ fontWeight: 700, marginBottom: 6 }}>핵심 정답</div>
+                      <div style={{ whiteSpace: "pre-wrap" }}>{m.correct_answer_core}</div>
                     </div>
                   )}
 
                   {m.correct_answer_full && (
                     <details>
-                      <summary style={{ cursor: "pointer", fontWeight: 700 }}>
-                        전체 해설/모범답안 보기
-                      </summary>
-                      <div style={{ marginTop: 8, whiteSpace: "pre-wrap" }}>
-                        {m.correct_answer_full}
-                      </div>
+                      <summary style={{ cursor: "pointer", fontWeight: 700 }}>전체 해설/모범답안 보기</summary>
+                      <div style={{ marginTop: 8, whiteSpace: "pre-wrap" }}>{m.correct_answer_full}</div>
                     </details>
                   )}
                 </div>
               );
             })}
 
-            {loadingQ && (
-              <div className="msg msg-ai" style={{ opacity: 0.7 }}>
-                질문 불러오는 중...
-              </div>
-            )}
-            {checking && (
-              <div className="msg msg-ai" style={{ opacity: 0.7 }}>
-                답변 채점 중...
-              </div>
-            )}
+            {loadingQ && <div className="msg msg-ai" style={{ opacity: 0.7 }}>질문 불러오는 중...</div>}
+            {checking && <div className="msg msg-ai" style={{ opacity: 0.7 }}>답변 채점 중...</div>}
 
             {error && (
-              <div
-                className="msg msg-ai"
-                style={{ border: "1px solid #fecaca", background: "#fff1f2" }}
-              >
+              <div className="msg msg-ai" style={{ border: "1px solid #fecaca", background: "#fff1f2" }}>
                 <b style={{ color: "#b91c1c" }}>에러:</b> {error}
               </div>
             )}
@@ -361,16 +289,10 @@ export default function InterviewPage() {
               placeholder="답변을 입력하세요... (Enter 전송)"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) =>
-                e.key === "Enter" && !e.shiftKey && !checking && handleSend()
-              }
+              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && !checking && handleSend()}
               disabled={loadingQ || checking}
             />
-            <button
-              className="send-btn"
-              onClick={handleSend}
-              disabled={loadingQ || checking}
-            >
+            <button className="send-btn" onClick={handleSend} disabled={loadingQ || checking}>
               <i className="fa-solid fa-paper-plane" />
             </button>
           </div>
