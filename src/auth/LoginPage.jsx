@@ -40,7 +40,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout title="로그인" subtitle="CS 면접 연습을 시작해볼까요?">
+    <AuthLayout title="로그인" >
       <form className="auth-form" onSubmit={onSubmit}>
         <label className="auth-label">아이디</label>
         <input

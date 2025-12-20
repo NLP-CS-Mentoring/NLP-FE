@@ -7,7 +7,6 @@ export default function MainLayout() {
     <div className="app-shell">
       <Sidebar />
       <main className="main">
-        <Header />
         <div className="content">
           <Outlet />
         </div>

@@ -10,6 +10,8 @@ type MenuItem = {
 const MENU: MenuItem[] = [
   { path: "/interview", label: "CS 면접 연습", icon: "fa-regular fa-comments" },
   { path: "/github", label: "깃허브 분석 챗", icon: "fa-brands fa-github" },
+
+  { path: "/my", label: "마이페이지", icon: "fa-regular fa-user" },
 ];
 
 export default function Sidebar() {
@@ -24,6 +26,7 @@ export default function Sidebar() {
 
       <div className="nav-group">
         <div className="nav-label">MAIN MENU</div>
+
         {MENU.map((m) => (
           <div
             key={m.path}

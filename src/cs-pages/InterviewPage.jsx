@@ -149,7 +149,7 @@ export default function InterviewPage() {
   };
 
   return (
-    <section className="card chat-wrapper">
+    <section className="card chat-wrapper main-card">
       <div className="chat-header">
         <div>
           <span className="trend-tag" style={{ margin: 0 }}>
