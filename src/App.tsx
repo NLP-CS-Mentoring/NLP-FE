@@ -15,6 +15,7 @@ import SignupPage from "./auth/SignupPage";
 import HomePage from "./pages/HomePage";
 import CoverLetter from './pages/CoverLetter'; 
 import NewsPage from './pages/NewsPage';
+import Algorithm from "./pages/Algorithm";
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/cover-letter" element={<CoverLetter />} />
         <Route path="/news" element={<NewsPage />} />
         <Route path="/my" element={<MyPage />} />
+        <Route path="/algorithm" element={<Algorithm />} />
       </Route>
 
       {/* 기타 경로는 /interview로 리다이렉트 */}
