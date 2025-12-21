@@ -14,6 +14,7 @@ import SignupPage from "./auth/SignupPage";
 // [페이지 임포트 - 작성자님 기능 추가]
 import HomePage from "./pages/HomePage";
 import CoverLetter from './pages/CoverLetter'; 
+import NewsPage from './pages/NewsPage';
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/interview" element={<InterviewPage />} />
         <Route path="/github" element={<GithubPage />} />
         <Route path="/cover-letter" element={<CoverLetter />} />
+        <Route path="/news" element={<NewsPage />} />
         <Route path="/my" element={<MyPage />} />
       </Route>
 
