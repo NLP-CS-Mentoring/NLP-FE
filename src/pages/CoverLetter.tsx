@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useCoverLetter } from "../hooks/useCoverLetter";
+import "./CoverLetter.css";
+import AgentChatModal from "../components/AgentChatModal";
+import { useAgentChat } from "../hooks/useAgentChat";
 
 import FileInput from "../components/FileInput";
 import TextArea from "../components/TextArea";
@@ -9,17 +12,15 @@ export default function CoverLetter() {
     const [userFact, setUserFact] = useState<string>("");
     const [file, setFile] = useState<File | null>(null);
     const [isCopied, setIsCopied] = useState<boolean>(false);
+    const [openAgent, setOpenAgent] = useState(false);
+    const { messages, loading: agentLoading, error: agentError, sendMessage, resetChat } = useAgentChat();
 
     const handleCopy = async () => {
         if (!result) return;
-
         try {
-            await navigator.clipboard.writeText(result); // 클립보드에 쓰기
+            await navigator.clipboard.writeText(result);
             setIsCopied(true);
-            
-            setTimeout(() => {
-                setIsCopied(false);
-            }, 2000);
+            setTimeout(() => setIsCopied(false), 2000);
         } catch (err) {
             console.error("복사 실패:", err);
             alert("복사에 실패했습니다.");
@@ -115,6 +116,25 @@ export default function CoverLetter() {
                     </div>
                 </div>
             </div>
+
+            <button
+                className="agent-fab"
+                onClick={() => setOpenAgent(prev => !prev)}
+                aria-label="AI 챗봇"
+            >
+                💬
+            </button>
+
+            <AgentChatModal
+                open={openAgent}
+                onClose={() => setOpenAgent(false)}
+                messages={messages}
+                loading={agentLoading}
+                error={agentError}
+                onSend={(msg) => sendMessage(msg, result || "")}
+                onReset={resetChat}
+                contextInfo={result ? "현재 생성된 자소서 내용이 전송됩니다." : undefined}
+            />
         </div>
     );
 }
