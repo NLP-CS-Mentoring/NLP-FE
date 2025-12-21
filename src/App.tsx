@@ -1,3 +1,11 @@
+
+import CoverLetter from './pages/CoverLetter';
+import './App.css'
+
+function App() {
+    return <CoverLetter/>;
+}
+
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import MainLayout from "./layouts/MainLayout"; 
