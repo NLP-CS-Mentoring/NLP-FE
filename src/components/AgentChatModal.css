@@ -101,6 +101,14 @@
   border-bottom-left-radius: 6px;
 }
 
+.agent-msg-body {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-x: hidden;
+  word-break: break-word;
+}
+
 .agent-download {
   display: inline-block;
   margin-top: 8px;

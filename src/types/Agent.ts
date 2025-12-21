@@ -1,10 +1,11 @@
-export type AgentReplyType = "text" | "file";
+export type AgentReplyType = "text" | "file" | "update";
 
 export interface AgentExecuteResponse {
   type: AgentReplyType;
   content: string;
   url?: string;
   filename?: string;
+  data?: string; 
 }
 
 export interface AgentMessage {
@@ -13,4 +14,5 @@ export interface AgentMessage {
   content: string;
   url?: string;
   filename?: string;
+  data?: string; 
 }

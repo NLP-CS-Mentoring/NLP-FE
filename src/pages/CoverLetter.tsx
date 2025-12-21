@@ -17,14 +17,10 @@ export default function CoverLetter() {
 
     const handleCopy = async () => {
         if (!result) return;
-
         try {
-            await navigator.clipboard.writeText(result); 
+            await navigator.clipboard.writeText(result);
             setIsCopied(true);
-            
-            setTimeout(() => {
-                setIsCopied(false);
-            }, 2000);
+            setTimeout(() => setIsCopied(false), 2000);
         } catch (err) {
             console.error("복사 실패:", err);
             alert("복사에 실패했습니다.");
