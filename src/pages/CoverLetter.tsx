@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useCoverLetter } from "../hooks/useCoverLetter";
+import "./CoverLetter.css";
 
 import FileInput from "../components/FileInput";
 import TextArea from "../components/TextArea";
