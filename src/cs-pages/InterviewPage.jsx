@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 
 async function fetchRandomQuestion() {
-  const res = await fetch(`${API_BASE}/random-question`, {
+  const res = await fetch(`${API_BASE}/cs-interview/random-question`, {
     credentials: "include", // ✅ 로그인 쿠키(session_id) 포함
   });
   if (!res.ok) {
@@ -14,7 +14,7 @@ async function fetchRandomQuestion() {
 }
 
 async function checkAnswer({ id, user_answer }) {
-  const res = await fetch(`${API_BASE}/check-answer`, {
+  const res = await fetch(`${API_BASE}/cs-interview/check-answer`, {
     method: "POST",
     credentials: "include", // ✅ 로그인 쿠키(session_id) 포함
     headers: { "Content-Type": "application/json" },
