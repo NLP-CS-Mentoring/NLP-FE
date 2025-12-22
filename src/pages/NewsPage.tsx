@@ -53,6 +53,36 @@ export default function NewsPage() {
         return [];
     };
 
+    // 요약을 배열로 파싱하는 함수
+    const parseSummary = (summary: any): string[] => {
+        if (!summary) return [];
+        if (Array.isArray(summary)) return summary;
+
+        if (typeof summary === "string") {
+            try {
+                const parsed = JSON.parse(summary);
+                if (Array.isArray(parsed)) {
+                    return parsed.map(s => String(s).trim()).filter(Boolean);
+                }
+            } catch {
+                // not JSON, continue
+            }
+
+            const byLines = summary.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+            if (byLines.length > 1) return byLines;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+
+            const byBullets = summary.split(/[•\-;]\s*/).map(s => s.trim()).filter(Boolean);
+            if (byBullets.length > 1) return byBullets;
+
+            const bySentences = summary.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
+            if (bySentences.length > 1) return bySentences;
+
+            return [summary];
+        }
+
+        return [String(summary)];
+    };
+
     return (
         <div className="news-container">
             <header className="news-header">
@@ -93,7 +123,18 @@ export default function NewsPage() {
                             <div className="result-box">
                                 <div className="trend-section">
                                     <h3>📊 요약</h3>
-                                    <p>{trendReport.summary}</p>
+                                    {(() => {
+                                        const summaryItems = parseSummary(trendReport.summary);
+                                        return summaryItems.length > 1 ? (
+                                            <ul className="summary-list">
+                                                {summaryItems.map((item, idx) => (
+                                                    <p key={idx}>{item}</p>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p style={{ whiteSpace: "pre-line" }}>{trendReport.summary}</p>
+                                        );
+                                    })()}
                                 </div>
                                 <div className="trend-section">
                                     <h3>🔑 핵심 키워드</h3>
